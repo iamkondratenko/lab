@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title></title>
+  <title>Лабиринт Комбинаций</title>
   <style>
     body {
       display: flex;
@@ -17,7 +17,6 @@
     #game-board {
       display: grid;
       grid-template-columns: repeat(8, 12vw);
-      /* gap: 10px; */
       width: auto;
     }
 
@@ -35,23 +34,22 @@
 
     @media screen and (min-width: 980px) {
       .block {
-      width: 80px;
-      height: 80px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 36px;
-      font-weight: bold;
-      border: 2px solid #111;
-      cursor: pointer;
-    }
+        width: 80px;
+        height: 80px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 36px;
+        font-weight: bold;
+        border: 2px solid #111;
+        cursor: pointer;
+      }
 
-    #game-board {
-      display: grid;
-      grid-template-columns: repeat(8, 80px);
-      /* gap: 10px; */
-      width: auto;
-    }
+      #game-board {
+        display: grid;
+        grid-template-columns: repeat(8, 80px);
+        width: auto;
+      }
     }
 
     #score {
@@ -62,22 +60,34 @@
       font-size: 20px;
       font-weight: bold;
     }
+
+    #timer {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      color: #fff;
+      font-size: 20px;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
 
 <div id="game-board"></div>
 <div id="score">Score: 0</div>
+<div id="timer">Time: 60s</div>
 
 <script>
   const gameBoard = document.getElementById('game-board');
   const scoreElement = document.getElementById('score');
+  const timerElement = document.getElementById('timer');
   let selectedBlock = null;
   let score = 0;
+  let time = 60;
+  let timerInterval;
 
   function createRandomBlock() {
     const colors = ['#ff5733', '#33ff57', '#5733ff', '#ff33a1'];
-    // const shapes = ['■', '▲', '⚫', '❤', '★', '♫', '☾', '❄'];
     const shapes = ['■', '▲', '⬤', '☗', '★', '♣  ', '♥', '♠'];
 
     const color = colors[Math.floor(Math.random() * colors.length)];
@@ -113,6 +123,9 @@
 
           // Обновление счета
           updateScore(points);
+
+          // Увеличение времени
+          updateTime(1);
         }
 
         selectedBlock.classList.remove('selected');
@@ -148,52 +161,6 @@
 
     renderGameBoard();
   }
-
-  // document.addEventListener('keydown', (event) => {
-  //   if (selectedBlock) {
-  //     const selectedRow = parseInt(selectedBlock.dataset.row);
-  //     const selectedCol = parseInt(selectedBlock.dataset.col);
-
-  //     switch (event.key) {
-  //       case 'ArrowUp':
-  //         if (selectedRow > 0) {
-  //           selectedBlock.classList.remove('selected');
-  //           selectedBlock = null;
-  //           const points = swapBlocks(selectedRow, selectedCol, selectedRow - 1, selectedCol);
-  //           renderGameBoard();
-  //           updateScore(points);
-  //         }
-  //         break;
-  //       case 'ArrowDown':
-  //         if (selectedRow < 7) {
-  //           selectedBlock.classList.remove('selected');
-  //           selectedBlock = null;
-  //           const points = swapBlocks(selectedRow, selectedCol, selectedRow + 1, selectedCol);
-  //           renderGameBoard();
-  //           updateScore(points);
-  //         }
-  //         break;
-  //       case 'ArrowLeft':
-  //         if (selectedCol > 0) {
-  //           selectedBlock.classList.remove('selected');
-  //           selectedBlock = null;
-  //           const points = swapBlocks(selectedRow, selectedCol, selectedRow, selectedCol - 1);
-  //           renderGameBoard();
-  //           updateScore(points);
-  //         }
-  //         break;
-  //       case 'ArrowRight':
-  //         if (selectedCol < 7) {
-  //           selectedBlock.classList.remove('selected');
-  //           selectedBlock = null;
-  //           const points = swapBlocks(selectedRow, selectedCol, selectedRow, selectedCol + 1);
-  //           renderGameBoard();
-  //           updateScore(points);
-  //         }
-  //         break;
-  //     }
-  //   }
-  // });
 
   function swapBlocks(row1, col1, row2, col2) {
     const tempBlock = { ...blocks[row1][col1] };
@@ -234,10 +201,26 @@
     scoreElement.innerText = `Score: ${score}`;
   }
 
-  let blocks = [];
+  function updateTime(seconds) {
+    time += seconds;
+    timerElement.innerText = `Time: ${time}s`;
+  }
 
-  document.addEventListener('load', initializeGame())
-  
+  function startTimer() {
+    timerInterval = setInterval(() => {
+      time--;
+      timerElement.innerText = `Time: ${time}s`;
+
+      if (time <= 0) {
+        clearInterval(timerInterval);
+        alert(`Game Over! Your Score: ${score}`);
+        location.reload(); // Перезагрузить страницу после окончания времени
+      }
+    }, 1000);
+  }
+
+  initializeGame();
+  startTimer();
 </script>
 
 </body>
