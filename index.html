@@ -92,6 +92,14 @@
 <div id="timer">Time: 60s</div>
 
 <script>
+
+document.addEventListener('touchstart', function(event) {
+      // Предотвращение действия двойного тапа для зума
+      if (event.touches.length > 1) {
+        event.preventDefault();
+      }
+    });
+
   const gameBoard = document.getElementById('game-board');
   const scoreElement = document.getElementById('score');
   const timerElement = document.getElementById('timer');
