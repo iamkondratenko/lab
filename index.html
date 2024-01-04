@@ -147,7 +147,7 @@ document.addEventListener('touchstart', function(event) {
           updateScore(points);
 
           // Увеличение времени
-          updateTime(1);
+          
         }
 
         selectedBlock.classList.remove('selected');
@@ -194,6 +194,7 @@ document.addEventListener('touchstart', function(event) {
       // Если форма совпадает, установить два пустых блока
       blocks[row1][col1] = { color: 'white', shape: '' };
       blocks[row2][col2] = { color: 'white', shape: '' };
+      updateTime(1);
       return countEmptyBlocks();
     } else {
       // Если форма не совпадает, установить случайную форму на одном из пустых блоков
