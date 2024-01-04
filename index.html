@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title></title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #111;
+    }
+
+    #game-board {
+      display: grid;
+      grid-template-columns: repeat(8, 12vw);
+      /* gap: 10px; */
+      width: auto;
+    }
+
+    .block {
+      width: 12vw;
+      height: 12vw;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 36px;
+      font-weight: bold;
+      border: 2px solid #111;
+      cursor: pointer;
+    }
+
+    @media screen and (min-width: 980px) {
+      .block {
+      width: 80px;
+      height: 80px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 36px;
+      font-weight: bold;
+      border: 2px solid #111;
+      cursor: pointer;
+    }
+
+    #game-board {
+      display: grid;
+      grid-template-columns: repeat(8, 80px);
+      /* gap: 10px; */
+      width: auto;
+    }
+    }
+
+    #score {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      color: #fff;
+      font-size: 20px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+<div id="game-board"></div>
+<div id="score">Score: 0</div>
+
+<script>
+  const gameBoard = document.getElementById('game-board');
+  const scoreElement = document.getElementById('score');
+  let selectedBlock = null;
+  let score = 0;
+
+  function createRandomBlock() {
+    const colors = ['#ff5733', '#33ff57', '#5733ff', '#ff33a1'];
+    // const shapes = ['■', '▲', '⚫', '❤', '★', '♫', '☾', '❄'];
+    const shapes = ['■', '▲', '⬤', '❤', '★', '♫', '☾', '❄'];
+
+    const color = colors[Math.floor(Math.random() * colors.length)];
+    const shape = shapes[Math.floor(Math.random() * shapes.length)];
+
+    return { color, shape };
+  }
+
+  function renderBlock(block, rowIndex, colIndex) {
+    const blockElement = document.createElement('div');
+    blockElement.classList.add('block');
+    blockElement.style.backgroundColor = block.color;
+    blockElement.innerText = block.shape;
+    blockElement.dataset.row = rowIndex;
+    blockElement.dataset.col = colIndex;
+
+    blockElement.addEventListener('click', () => {
+      if (selectedBlock) {
+        const selectedRow = parseInt(selectedBlock.dataset.row);
+        const selectedCol = parseInt(selectedBlock.dataset.col);
+        const currentRow = parseInt(blockElement.dataset.row);
+        const currentCol = parseInt(blockElement.dataset.col);
+
+        if (
+          (Math.abs(selectedRow - currentRow) === 1 && selectedCol === currentCol) ||
+          (Math.abs(selectedCol - currentCol) === 1 && selectedRow === currentRow)
+        ) {
+          // Обмен блоков
+          const points = swapBlocks(selectedRow, selectedCol, currentRow, currentCol);
+
+          // Перерисовка блоков
+          renderGameBoard();
+
+          // Обновление счета
+          updateScore(points);
+        }
+
+        selectedBlock.classList.remove('selected');
+        selectedBlock = null;
+      } else {
+        selectedBlock = blockElement;
+        selectedBlock.classList.add('selected');
+      }
+    });
+
+    gameBoard.appendChild(blockElement);
+  }
+
+  function renderGameBoard() {
+    gameBoard.innerHTML = '';
+
+    for (let i = 0; i < 8; i++) {
+      for (let j = 0; j < 8; j++) {
+        const block = blocks[i][j];
+        renderBlock(block, i, j);
+      }
+    }
+  }
+
+  function initializeGame() {
+    blocks = [];
+    for (let i = 0; i < 8; i++) {
+      blocks[i] = [];
+      for (let j = 0; j < 8; j++) {
+        blocks[i][j] = createRandomBlock();
+      }
+    }
+
+    renderGameBoard();
+  }
+
+  // document.addEventListener('keydown', (event) => {
+  //   if (selectedBlock) {
+  //     const selectedRow = parseInt(selectedBlock.dataset.row);
+  //     const selectedCol = parseInt(selectedBlock.dataset.col);
+
+  //     switch (event.key) {
+  //       case 'ArrowUp':
+  //         if (selectedRow > 0) {
+  //           selectedBlock.classList.remove('selected');
+  //           selectedBlock = null;
+  //           const points = swapBlocks(selectedRow, selectedCol, selectedRow - 1, selectedCol);
+  //           renderGameBoard();
+  //           updateScore(points);
+  //         }
+  //         break;
+  //       case 'ArrowDown':
+  //         if (selectedRow < 7) {
+  //           selectedBlock.classList.remove('selected');
+  //           selectedBlock = null;
+  //           const points = swapBlocks(selectedRow, selectedCol, selectedRow + 1, selectedCol);
+  //           renderGameBoard();
+  //           updateScore(points);
+  //         }
+  //         break;
+  //       case 'ArrowLeft':
+  //         if (selectedCol > 0) {
+  //           selectedBlock.classList.remove('selected');
+  //           selectedBlock = null;
+  //           const points = swapBlocks(selectedRow, selectedCol, selectedRow, selectedCol - 1);
+  //           renderGameBoard();
+  //           updateScore(points);
+  //         }
+  //         break;
+  //       case 'ArrowRight':
+  //         if (selectedCol < 7) {
+  //           selectedBlock.classList.remove('selected');
+  //           selectedBlock = null;
+  //           const points = swapBlocks(selectedRow, selectedCol, selectedRow, selectedCol + 1);
+  //           renderGameBoard();
+  //           updateScore(points);
+  //         }
+  //         break;
+  //     }
+  //   }
+  // });
+
+  function swapBlocks(row1, col1, row2, col2) {
+    const tempBlock = { ...blocks[row1][col1] };
+    blocks[row1][col1] = { ...blocks[row2][col2] };
+    blocks[row2][col2] = { ...tempBlock };
+
+    // Проверка на совпадение формы
+    if (blocks[row1][col1].shape === blocks[row2][col2].shape) {
+      // Если форма совпадает, установить два пустых блока
+      blocks[row1][col1] = { color: 'white', shape: '' };
+      blocks[row2][col2] = { color: 'white', shape: '' };
+      return countEmptyBlocks();
+    } else {
+      // Если форма не совпадает, установить случайную форму на одном из пустых блоков
+      if (blocks[row1][col1].color === 'white' && blocks[row1][col1].shape === '') {
+        blocks[row1][col1] = createRandomBlock();
+      } else if (blocks[row2][col2].color === 'white' && blocks[row2][col2].shape === '') {
+        blocks[row2][col2] = createRandomBlock();
+      }
+      return 0;
+    }
+  }
+
+  function countEmptyBlocks() {
+    let count = 0;
+    for (let i = 0; i < 8; i++) {
+      for (let j = 0; j < 8; j++) {
+        if (blocks[i][j].color === 'white' && blocks[i][j].shape === '') {
+          count++;
+        }
+      }
+    }
+    return count;
+  }
+
+  function updateScore(points) {
+    score += points;
+    scoreElement.innerText = `Score: ${score}`;
+  }
+
+  let blocks = [];
+
+  document.addEventListener('load', initializeGame())
+  
+</script>
+
+</body>
+</html>
