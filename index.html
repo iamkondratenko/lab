@@ -12,21 +12,21 @@
       margin: 0;
       background-color: #111;
       touch-action: pan-x pan-y;
+      overflow: hidden;
     }
 
     .unselectable {
-  -webkit-touch-callout: none; /* iOS Safari */
-  -webkit-user-select: none;   /* Chrome/Safari/Opera */
-  -khtml-user-select: none;    /* Konqueror */
-  -moz-user-select: none;      /* Firefox */
-  -ms-user-select: none;       /* Internet Explorer/Edge */
-  user-select: none;           /* Non-prefixed version, currently
-                                  not supported by any browser */
-}
+      -webkit-touch-callout: none; /* iOS Safari */
+      -webkit-user-select: none;   /* Chrome/Safari/Opera */
+      -khtml-user-select: none;    /* Konqueror */
+      -moz-user-select: none;      /* Firefox */
+      -ms-user-select: none;       /* Internet Explorer/Edge */
+      user-select: none;           /* Non-prefixed version, currently not supported by any browser */
+    }
 
-.block.selected {
-    border: 2px solid #fff;
-}
+    .block.selected {
+      border: 2px solid #fff;
+    }
 
     #game-board {
       display: grid;
@@ -83,6 +83,20 @@
       font-size: 20px;
       font-weight: bold;
     }
+
+    #start-button {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      padding: 15px 30px;
+      font-size: 24px;
+      cursor: pointer;
+      background-color: #3498db;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+    }
   </style>
 </head>
 <body class="unselectable">
@@ -90,19 +104,13 @@
 <div id="game-board"></div>
 <div id="score">Score: 0</div>
 <div id="timer">Time: 60s</div>
+<button id="start-button">Start Game</button>
 
 <script>
-
-document.addEventListener('touchstart', function(event) {
-      // Предотвращение действия двойного тапа для зума
-      if (event.touches.length > 1) {
-        event.preventDefault();
-      }
-    });
-
   const gameBoard = document.getElementById('game-board');
   const scoreElement = document.getElementById('score');
   const timerElement = document.getElementById('timer');
+  const startButton = document.getElementById('start-button');
   let selectedBlock = null;
   let score = 0;
   let time = 60;
@@ -117,6 +125,60 @@ document.addEventListener('touchstart', function(event) {
 
     return { color, shape };
   }
+
+
+
+
+
+  document.addEventListener('keydown', (event) => {
+    if (selectedBlock) {
+      const selectedRow = parseInt(selectedBlock.dataset.row);
+      const selectedCol = parseInt(selectedBlock.dataset.col);
+
+      switch (event.key) {
+        case 'ArrowUp':
+          if (selectedRow > 0) {
+            selectedBlock.classList.remove('selected');
+            selectedBlock = null;
+            const points = swapBlocks(selectedRow, selectedCol, selectedRow - 1, selectedCol);
+            renderGameBoard();
+            updateScore(points);
+          }
+          break;
+        case 'ArrowDown':
+          if (selectedRow < 7) {
+            selectedBlock.classList.remove('selected');
+            selectedBlock = null;
+            const points = swapBlocks(selectedRow, selectedCol, selectedRow + 1, selectedCol);
+            renderGameBoard();
+            updateScore(points);
+          }
+          break;
+        case 'ArrowLeft':
+          if (selectedCol > 0) {
+            selectedBlock.classList.remove('selected');
+            selectedBlock = null;
+            const points = swapBlocks(selectedRow, selectedCol, selectedRow, selectedCol - 1);
+            renderGameBoard();
+            updateScore(points);
+          }
+          break;
+        case 'ArrowRight':
+          if (selectedCol < 7) {
+            selectedBlock.classList.remove('selected');
+            selectedBlock = null;
+            const points = swapBlocks(selectedRow, selectedCol, selectedRow, selectedCol + 1);
+            renderGameBoard();
+            updateScore(points);
+          }
+          break;
+      }
+    }
+  });
+
+
+
+
 
   function renderBlock(block, rowIndex, colIndex) {
     const blockElement = document.createElement('div');
@@ -147,7 +209,7 @@ document.addEventListener('touchstart', function(event) {
           updateScore(points);
 
           // Увеличение времени
-          
+          updateTime(3);
         }
 
         selectedBlock.classList.remove('selected');
@@ -242,8 +304,11 @@ document.addEventListener('touchstart', function(event) {
     }, 1000);
   }
 
-  initializeGame();
-  startTimer();
+  startButton.addEventListener('click', () => {
+    startButton.style.display = 'none'; // Скрыть кнопку старта после начала игры
+    initializeGame();
+    startTimer();
+  });
 </script>
 
 </body>
