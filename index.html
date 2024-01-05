@@ -46,6 +46,7 @@
       font-weight: bold;
       border: 2px solid #111;
       cursor: pointer;
+      border-radius: 50%;
     }
 
     @media screen and (min-width: 980px) {
@@ -63,7 +64,7 @@
 
       #game-board {
         display: grid;
-        grid-template-columns: repeat(8, 80px);
+        grid-template-columns: repeat(8, 1fr);
         width: auto;
       }
     }
@@ -115,11 +116,13 @@
   const startButton = document.getElementById('start-button');
   let selectedBlock = null;
   let score = 0;
-  let time = 60;
+  let time = 600;
   let timerInterval;
 
   function createRandomBlock() {
-    const colors = ['#ff5733', '#33ff57', '#5733ff', '#ff33a1'];
+    // const colors = ['#c53b30', '#44a8a0', '#454e93', '#f7bb49', '#e89dc6', '#785e9f'];
+    // const colors = ['#ef3124', '#f3e0ff', '#bdf2f0', '#fff6b8', '#77a5ff', '#e6ec53'];
+    const colors = ['#e56548', '#4594a3', '#fabd6a', '#a9ae54'];
     const shapes = ['■', '▲', '⬤', '★', '♥', '♠'];
 
     const color = colors[Math.floor(Math.random() * colors.length)];
