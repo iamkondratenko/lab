@@ -2,7 +2,7 @@
     "name": "Annihilator 3000",
     "short_name": "A3000",
     "description": "A fun puzzle game",
-    "start_url": "/",
+    "start_url": "index.html",
     "display": "fullscreen",
     "background_color": "#111",
     "theme_color": "#3498db",
