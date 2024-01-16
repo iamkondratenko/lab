@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    
+</body>
+<script>
+
+// Создаем RTCPeerConnection
+const peerConnectionB = new RTCPeerConnection();
+
+// Обработчик события открытия канала
+peerConnectionB.ondatachannel = (event) => {
+  const dataChannelB = event.channel;
+
+  // Обработчик события открытия канала
+  dataChannelB.onopen = (event) => {
+    console.log('Data Channel B is open!');
+  };
+
+  // Обработчик события получения сообщения
+  dataChannelB.onmessage = (event) => {
+    console.log('Received message in B:', event.data);
+  };
+};
+
+// Получаем предложение от другого браузера (например, через сетевой канал, веб-сокеты, etc.)
+const offerData = // Получаем offerData от другого браузера;
+
+// Устанавливаем полученное предложение как удаленное описание
+peerConnectionB.setRemoteDescription(offerData.offer)
+  .then(() => peerConnectionB.createAnswer())
+  .then(answer => peerConnectionB.setLocalDescription(answer))
+  .then(() => {
+    // Отправляем ответ другому браузеру (например, через сетевой канал, веб-сокеты, etc.)
+    const answerData = { answer: peerConnectionB.localDescription };
+    // Отправляем answerData другому браузеру
+  })
+  .catch(error => console.error('Error creating answer:', error));
+
+
+</script>
+</html>

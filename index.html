@@ -78,6 +78,15 @@
       font-weight: bold;
     }
 
+    #moves {
+      position: absolute;
+      top: 40px;
+      left: 10px;
+      color: #fff;
+      font-size: 20px;
+      font-weight: bold;
+    }
+
     #timer {
       position: absolute;
       top: 10px;
@@ -106,18 +115,21 @@
 
 <div id="game-board"></div>
 <div id="score">Score: 0</div>
+<div id="moves">Moves: 0</div>
 <div id="timer">Time: 60s</div>
 <button id="start-button">Start Game</button>
 
 <script>
   const gameBoard = document.getElementById('game-board');
   const scoreElement = document.getElementById('score');
+  const moves = document.getElementById('moves');
   const timerElement = document.getElementById('timer');
   const startButton = document.getElementById('start-button');
   let selectedBlock = null;
   let score = 0;
-  let time = 600;
+  let time = 60;
   let timerInterval;
+  let emptyMove = 0
 
   function createRandomBlock() {
     // const colors = ['#c53b30', '#44a8a0', '#454e93', '#f7bb49', '#e89dc6', '#785e9f'];
@@ -130,58 +142,6 @@
 
     return { color, shape };
   }
-
-
-
-
-
-  document.addEventListener('keydown', (event) => {
-    if (selectedBlock) {
-      const selectedRow = parseInt(selectedBlock.dataset.row);
-      const selectedCol = parseInt(selectedBlock.dataset.col);
-
-      switch (event.key) {
-        case 'ArrowUp':
-          if (selectedRow > 0) {
-            selectedBlock.classList.remove('selected');
-            selectedBlock = null;
-            const points = swapBlocks(selectedRow, selectedCol, selectedRow - 1, selectedCol);
-            renderGameBoard();
-            updateScore(points);
-          }
-          break;
-        case 'ArrowDown':
-          if (selectedRow < 7) {
-            selectedBlock.classList.remove('selected');
-            selectedBlock = null;
-            const points = swapBlocks(selectedRow, selectedCol, selectedRow + 1, selectedCol);
-            renderGameBoard();
-            updateScore(points);
-          }
-          break;
-        case 'ArrowLeft':
-          if (selectedCol > 0) {
-            selectedBlock.classList.remove('selected');
-            selectedBlock = null;
-            const points = swapBlocks(selectedRow, selectedCol, selectedRow, selectedCol - 1);
-            renderGameBoard();
-            updateScore(points);
-          }
-          break;
-        case 'ArrowRight':
-          if (selectedCol < 7) {
-            selectedBlock.classList.remove('selected');
-            selectedBlock = null;
-            const points = swapBlocks(selectedRow, selectedCol, selectedRow, selectedCol + 1);
-            renderGameBoard();
-            updateScore(points);
-          }
-          break;
-      }
-    }
-  });
-
-
 
 
 
@@ -207,11 +167,13 @@
           // Обмен блоков
           const points = swapBlocks(selectedRow, selectedCol, currentRow, currentCol);
 
-          // Перерисовка блоков
-          renderGameBoard();
-
           // Обновление счета
           updateScore(points);
+
+          // Перерисовка блоков
+          
+
+          
 
           // Увеличение времени
         //   updateTime(3);
@@ -252,23 +214,44 @@
   }
 
   function swapBlocks(row1, col1, row2, col2) {
-    const tempBlock = { ...blocks[row1][col1] };
-    blocks[row1][col1] = { ...blocks[row2][col2] };
-    blocks[row2][col2] = { ...tempBlock };
+    if (emptyMove > 0 || blocks[row1][col1].shape === blocks[row2][col2].shape && blocks[row1][col1].color != 'white') {
+      const tempBlock = { ...blocks[row1][col1] };
+      blocks[row1][col1] = { ...blocks[row2][col2] };
+      blocks[row2][col2] = { ...tempBlock };
+    } else {
+
+    }
+    
 
     // Проверка на совпадение формы
-    if (blocks[row1][col1].shape === blocks[row2][col2].shape) {
+    if (blocks[row1][col1].shape === blocks[row2][col2].shape && blocks[row1][col1].color != 'white' ) {
+      emptyMove++
       // Если форма совпадает, установить два пустых блока
       blocks[row1][col1] = { color: 'white', shape: '' };
       blocks[row2][col2] = { color: 'white', shape: '' };
+      
       updateTime(3);
+      renderGameBoard();
+      
       return countEmptyBlocks();
     } else {
       // Если форма не совпадает, установить случайную форму на одном из пустых блоков
-      if (blocks[row1][col1].color === 'white' && blocks[row1][col1].shape === '') {
+      if (blocks[row1][col1].color === 'white' && blocks[row1][col1].shape === '' && blocks[row2][col2].color != 'white'  && emptyMove > 0) {
         blocks[row1][col1] = createRandomBlock();
-      } else if (blocks[row2][col2].color === 'white' && blocks[row2][col2].shape === '') {
+        emptyMove--
+        renderGameBoard();
+      } else if (blocks[row2][col2].color === 'white' && blocks[row2][col2].shape === '' && blocks[row1][col1].color != 'white'  && emptyMove > 0) {
         blocks[row2][col2] = createRandomBlock();
+        emptyMove--
+        renderGameBoard();
+
+      }
+      else {
+        if (blocks[row1][col1].color != 'white' && blocks[row2][col2].color != 'white'  && emptyMove > 0) {
+          emptyMove--
+          renderGameBoard();
+        } 
+        
       }
       return 0;
     }
@@ -289,6 +272,7 @@
   function updateScore(points) {
     score += points;
     scoreElement.innerText = `Score: ${score}`;
+    moves.innerText = `Moves: ${emptyMove}`;
   }
 
   function updateTime(seconds) {
