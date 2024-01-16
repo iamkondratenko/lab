@@ -34,6 +34,7 @@
       display: grid;
       grid-template-columns: repeat(8, 12vw);
       width: auto;
+      border: 17px solid #ffffff12;
     }
 
     .block {
@@ -46,7 +47,28 @@
       font-weight: bold;
       border: 2px solid #111;
       cursor: pointer;
-      border-radius: 50%;
+      border-radius: 10%;
+      transition: transform 0.2s ease-in-out; /* Добавленная анимация */
+    }
+
+    .block:hover {
+      transform: scale(1.1); /* Увеличиваем размер при наведении */
+    }
+
+    .block.swap {
+      animation: swapAnimation 0.3s ease-in-out; /* Анимация при swap */
+    }
+
+    @keyframes swapAnimation {
+      0% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.2);
+      }
+      100% {
+        transform: scale(1);
+      }
     }
 
     @media screen and (min-width: 980px) {
@@ -60,6 +82,9 @@
         font-weight: bold;
         border: 2px solid #111;
         cursor: pointer;
+        box-shadow: inset 0 0 2px 7px rgb(0 0 0 / 21%);
+        color: #000000e0;
+        background: linear-gradient(45deg, rgb(85 85 85 / 45%),rgb(255 255 255 / 11%), #00000059);
       }
 
       #game-board {
@@ -127,7 +152,7 @@
   const startButton = document.getElementById('start-button');
   let selectedBlock = null;
   let score = 0;
-  let time = 60;
+  let time = 600;
   let timerInterval;
   let emptyMove = 0
 
@@ -142,8 +167,6 @@
 
     return { color, shape };
   }
-
-
 
   function renderBlock(block, rowIndex, colIndex) {
     const blockElement = document.createElement('div');
@@ -171,12 +194,10 @@
           updateScore(points);
 
           // Перерисовка блоков
-          
-
-          
+          renderGameBoard();
 
           // Увеличение времени
-        //   updateTime(3);
+          //   updateTime(3);
         }
 
         selectedBlock.classList.remove('selected');
@@ -214,44 +235,52 @@
   }
 
   function swapBlocks(row1, col1, row2, col2) {
-    if (emptyMove > 0 || blocks[row1][col1].shape === blocks[row2][col2].shape && blocks[row1][col1].color != 'white') {
+    if (emptyMove > 0 || (blocks[row1][col1].shape === blocks[row2][col2].shape && blocks[row1][col1].color != 'white')) {
       const tempBlock = { ...blocks[row1][col1] };
       blocks[row1][col1] = { ...blocks[row2][col2] };
       blocks[row2][col2] = { ...tempBlock };
+
+      // Добавляем класс swap для блоков, которые будут проходить анимацию
+      document.querySelector(`[data-row='${row1}'][data-col='${col1}']`).classList.add('swap');
+      document.querySelector(`[data-row='${row2}'][data-col='${col2}']`).classList.add('swap');
+
+      // Убираем класс swap после завершения анимации
+      setTimeout(() => {
+        document.querySelector(`[data-row='${row1}'][data-col='${col1}']`).classList.remove('swap');
+        document.querySelector(`[data-row='${row2}'][data-col='${col2}']`).classList.remove('swap');
+      }, 300);
     } else {
 
     }
-    
 
     // Проверка на совпадение формы
-    if (blocks[row1][col1].shape === blocks[row2][col2].shape && blocks[row1][col1].color != 'white' ) {
+    if (blocks[row1][col1].shape === blocks[row2][col2].shape && blocks[row1][col1].color != 'white') {
       emptyMove++
       // Если форма совпадает, установить два пустых блока
       blocks[row1][col1] = { color: 'white', shape: '' };
       blocks[row2][col2] = { color: 'white', shape: '' };
-      
+
       updateTime(3);
       renderGameBoard();
-      
+
       return countEmptyBlocks();
     } else {
       // Если форма не совпадает, установить случайную форму на одном из пустых блоков
-      if (blocks[row1][col1].color === 'white' && blocks[row1][col1].shape === '' && blocks[row2][col2].color != 'white'  && emptyMove > 0) {
+      if (blocks[row1][col1].color === 'white' && blocks[row1][col1].shape === '' && blocks[row2][col2].color != 'white' && emptyMove > 0) {
         blocks[row1][col1] = createRandomBlock();
         emptyMove--
         renderGameBoard();
-      } else if (blocks[row2][col2].color === 'white' && blocks[row2][col2].shape === '' && blocks[row1][col1].color != 'white'  && emptyMove > 0) {
+      } else if (blocks[row2][col2].color === 'white' && blocks[row2][col2].shape === '' && blocks[row1][col1].color != 'white' && emptyMove > 0) {
         blocks[row2][col2] = createRandomBlock();
         emptyMove--
         renderGameBoard();
 
-      }
-      else {
-        if (blocks[row1][col1].color != 'white' && blocks[row2][col2].color != 'white'  && emptyMove > 0) {
+      } else {
+        if (blocks[row1][col1].color != 'white' && blocks[row2][col2].color != 'white' && emptyMove > 0) {
           emptyMove--
           renderGameBoard();
-        } 
-        
+        }
+
       }
       return 0;
     }
